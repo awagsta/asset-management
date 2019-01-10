@@ -1,0 +1,1 @@
+This repository contains the code for an asset management webserver written in python. Future scope now that a working prototype exists, is to add flask upload support or add support for storing images on object storage. This will make the URL image url field meaningful. Refactor the code to use Flask-Restful and Externalize the data models, then add gitlab support and features.
