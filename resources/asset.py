@@ -1,11 +1,13 @@
 import sys
 sys.path.append('..')
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from flask import jsonify, abort, request
 from models.models import AssetModel
 from models.models import CsModel
 from models.models import IndustryModel
 from database import db
+
+repo_url = 'www.gitlab.com'
 
 class Asset(Resource):
     def get(self, id):
@@ -62,11 +64,23 @@ class Asset(Resource):
         return jsonify({'asset': asset})
 
 
-class AssetList(Resource):
+class AllAssets(Resource):
     def get(self):
         assets = AssetModel.query.all()
         assetList = []
         for asset in assets:
             assetList.append(asset.to_json())
         return jsonify({'assets': assetList})
+
+class AssetList(Resource):
+    def get(self, token):
+        with gitlab.Gitlab(repo_url, token) as gl:
+            gl.auth()
+            current_user_id = gl.user.attributes.id
+            assets = AssetModel.query.filter(current_user_id=user_id)
+            json_data = []
+            for asset in assets:
+                json_data.append(asset.to_json())
+        
+        return jsonify({"Assets": json_data})
         

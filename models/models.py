@@ -5,6 +5,7 @@ from flask import url_for
 
 class AssetModel(db.Model):
     __tablename__ = 'assets'
+    user_id = db.Column(db.Integer, unique=True)
     asset_id = db.Column(db.Integer, primary_key=True)
     gitlab_id = db.Column(db.Integer, nullable=False)
     asset_name = db.Column(db.String(255), unique=True)
