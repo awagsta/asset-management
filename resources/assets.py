@@ -6,6 +6,7 @@ from models.models import AssetModel
 from models.models import CsModel
 from models.models import IndustryModel
 from database import db
+from auth import getUserId
 import gitlab
 
 repo_url = 'www.gitlab.com'
@@ -75,7 +76,7 @@ class AllAssets(Resource):
 
 class AssetList(Resource):
     def get(self, token):
-        user_id = auth(token)
+        user_id = getUserId(token)
         assets = AssetModel.query.filter(current_user_id=user_id)
         json_data = []
         for asset in assets:
