@@ -6,6 +6,7 @@ from models.models import AssetModel
 from models.models import CsModel
 from models.models import IndustryModel
 from database import db
+import gitlab
 
 repo_url = 'www.gitlab.com'
 
@@ -74,13 +75,11 @@ class AllAssets(Resource):
 
 class AssetList(Resource):
     def get(self, token):
-        with gitlab.Gitlab(repo_url, token) as gl:
-            gl.auth()
-            current_user_id = gl.user.attributes.id
-            assets = AssetModel.query.filter(current_user_id=user_id)
-            json_data = []
-            for asset in assets:
-                json_data.append(asset.to_json())
+        user_id = auth(token)
+        assets = AssetModel.query.filter(current_user_id=user_id)
+        json_data = []
+        for asset in assets:
+            json_data.append(asset.to_json())
         
         return jsonify({"Assets": json_data})
         

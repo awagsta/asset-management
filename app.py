@@ -3,8 +3,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from database import db
-from resources.asset import Asset, AllAssets
-from resources.project import ProjectList
+from resources.assets import Asset, AllAssets
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
