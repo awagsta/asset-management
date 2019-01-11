@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 api = Api(app)
 
-api.add_resource(Asset, '/asset/<int:id>', '/asset/')
+api.add_resource(Asset, '/asset/<int:id>', endpoint='get_asset')
+api.add_resource(Asset, '/asset/')
 api.add_resource(AssetList, '/assets/')
 app.run(port=5000, debug=True)

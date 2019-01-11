@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 from flask import jsonify, abort, request
 from models.models import AssetModel
 from models.models import CsModel

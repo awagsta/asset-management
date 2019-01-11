@@ -1,6 +1,7 @@
 import sys
 sys.path.append('..')
 from database import db
+from flask import url_for
 
 class AssetModel(db.Model):
     __tablename__ = 'assets'
@@ -22,6 +23,7 @@ class AssetModel(db.Model):
             csList.append(cs.to_json())
 
         asset = {
+            "asset_url": url_for('get_asset', id=self.asset_id, _external=True),
             "gitlab_id": self.gitlab_id,
             "asset_name": self.asset_name,
             "description": self.description,
@@ -30,6 +32,7 @@ class AssetModel(db.Model):
             "cloud_services": csList
         }
         return asset
+    
 
 class CsModel(db.Model):
     __tablename__: 'cloud_services'
