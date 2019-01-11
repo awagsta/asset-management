@@ -6,7 +6,6 @@ from models.models import AssetModel
 from models.models import CsModel
 from models.models import IndustryModel
 from database import db
-from auth import getUserId
 import gitlab
 
 repo_url = 'www.gitlab.com'
@@ -74,13 +73,14 @@ class AllAssets(Resource):
             assetList.append(asset.to_json())
         return jsonify({'assets': assetList})
 
-class AssetList(Resource):
-    def get(self, token):
-        user_id = getUserId(token)
-        assets = AssetModel.query.filter(current_user_id=user_id)
-        json_data = []
-        for asset in assets:
-            json_data.append(asset.to_json())
+# For when Oauth2 is implemented.
+# class AssetList(Resource):
+#     def get(self, token):
+#         user_id = getUserId(token)
+#         assets = AssetModel.query.filter(current_user_id=user_id)
+#         json_data = []
+#         for asset in assets:
+#             json_data.append(asset.to_json())
         
-        return jsonify({"Assets": json_data})
+#         return jsonify({"Assets": json_data})
         

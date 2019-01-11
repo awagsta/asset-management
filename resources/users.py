@@ -1,5 +1,8 @@
+import sys
+sys.path.append('..')
 from flask_restful import Resource
 from flask import request, abort
+from auth import repo_url
 import gitlab
 
 # add user lookup to ensure user does not already exist.
