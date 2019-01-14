@@ -17,5 +17,8 @@ api = Api(app)
 api.add_resource(Asset, '/asset/<int:id>', endpoint='get_asset')
 api.add_resource(Asset, '/asset/')
 api.add_resource(AllAssets, '/assets/')
-api.add_resource(User, '/users/<int:id>', '/users/')
-app.run(port=5000, debug=True)
+api.add_resource(User, '/users/<int:id>', endpoint='get_user')
+api.add_resource(User, '/users/')
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
