@@ -5,10 +5,10 @@ from flask import jsonify, abort, request
 from models.models import AssetModel
 from models.models import CsModel
 from models.models import IndustryModel
+from auth import repo_url, getUserIdOauth, getUserIdToken
 from database import db
 import gitlab
 
-repo_url = 'www.gitlab.com'
 
 class Asset(Resource):
     def get(self, id):
@@ -16,15 +16,27 @@ class Asset(Resource):
         if asset:
             return jsonify({'asset': asset.to_json()})
         else:
-            abort(404, message="Asset {} doesn't exist.".format(id))
+            abort(404)
     
     def post(self):
         if not request.json:
-            abort(400, message="Nothing submitted to server.")
+            abort(400)
         
         data = request.get_json()
+
+        # Get OAuth2 Token. Add JWT Support
+        oath_cookie = request.cookies.get('access_token')
+        
+        if oath_cookie:
+            user_id = getUserIdOauth(oath_cookie)
+        elif data['token']:
+            user_id= getUserIdToken(data['token'])
+        else:
+            abort(400)
+        
         asset = AssetModel(gitlab_id=data['gitlab_id'], 
-            asset_name=data['asset_name'], description=data['description'], image_url=data['image_url'])
+            asset_name=data['asset_name'], description=data['description'], 
+            image_url=data['image_url'], user_id=user_id)
         
      # Create Cloud Service Objects
         for cs in data['cloud_services']:
@@ -42,10 +54,10 @@ class Asset(Resource):
     def put(self, id):
         asset = AssetModel.query.get(id)
         if not asset:
-            abort(404, message="Asset {} doesn't exist".format(id))
+            abort(404)
         
         if not request.json:
-            abort(400, message="Nothing submitted to server.")
+            abort(400)
         
         data = request.get_json()
 
@@ -59,7 +71,7 @@ class Asset(Resource):
     def delete(self, id):
         asset = AssetModel.query.get(id)
         if not asset:
-            abort(404, message="Asset {} doesn't exist.".format(id))
+            abort(404)
         db.session.delete(id)
         db.session.commit()
         return jsonify({'asset': asset})

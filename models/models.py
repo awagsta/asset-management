@@ -5,7 +5,7 @@ from flask import url_for
 
 class AssetModel(db.Model):
     __tablename__ = 'assets'
-    user_id = db.Column(db.Integer, unique=True)
+    user_id = db.Column(db.Integer, nullable=False)
     asset_id = db.Column(db.Integer, primary_key=True)
     gitlab_id = db.Column(db.Integer, nullable=False)
     asset_name = db.Column(db.String(255), unique=True)
@@ -26,6 +26,7 @@ class AssetModel(db.Model):
         asset = {
             "asset_url": url_for('get_asset', id=self.asset_id, _external=True),
             "gitlab_id": self.gitlab_id,
+            "user_id": self.user_id,
             "asset_name": self.asset_name,
             "description": self.description,
             "image_url": self.image_url,
