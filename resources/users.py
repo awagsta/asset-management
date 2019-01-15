@@ -13,7 +13,7 @@ class User(Resource):
     def post(self):
         if not request.json:
             abort(400, message="Nothing submitted to the server.")
-        
+
         data = request.get_json()
 
         user = {
@@ -23,8 +23,17 @@ class User(Resource):
             'name': data['name']
         }
 
-        with gitlab.Gitlab(repo_url) as gl:
-             user = gl.users.create(user)
+        if request.cookie['access_token']:
+            oauth_token = request.cookie['access_token']
+            with gitlab.Gitlab(repo_url, ssl_verify=False, oauth_token=oauth_token) as gl:
+                user = gl.users.create(user)
+        
+        elif data['token']:
+            token = data['token']
+            with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
+                user = gl.users.create(user)
+        else:
+            abort(401, message="Unauthorized.")
         
         return jsonify({'username': user.attributes.username, 'id': url_for('get_user', 
         id=user.attributes.id, _external=True)})

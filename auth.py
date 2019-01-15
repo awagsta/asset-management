@@ -1,5 +1,5 @@
 import gitlab
-repo_url = 'https://129.213.56.181'
+repo_url = 'https://gitlab.cloudsolutionhubs.com'
 
 #TODO: Implement cookie/JWT based authentication 
 def getUserId(url, token):
