@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 import gitlab
 repo_url = 'https://gitlab.cloudsolutionhubs.com'
 
