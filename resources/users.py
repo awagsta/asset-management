@@ -51,8 +51,7 @@ class User(Resource):
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 gl.users.delete(id)
-                message = {'User with id {} deleted.'.format(id)}
-            return jsonify(message)
+            return jsonify({'User deleted.'})
 
         except GitlabDeleteError as error:
             abort(204, 'Resource not found.')

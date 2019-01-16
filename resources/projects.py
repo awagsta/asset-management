@@ -1,10 +1,11 @@
 import sys
 sys.path.append('..')
 from flask_restful import Resource
-from flask import jsonify
+from flask import jsonify, abort
 import gitlab
 from gitlab.exceptions import GitlabAuthenticationError
 from auth import repo_url
+
 
 # Get a single project by ID
 class Project(Resource):
@@ -39,7 +40,7 @@ class Project_List(Resource):
     def get(self, id, token):
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
-                projects = gl.projects.get(id)
+                projects = gl.projects.list(owned=True)
                 projectList = []
 
                 for project in projects:
@@ -47,6 +48,5 @@ class Project_List(Resource):
 
         except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
-        
         return jsonify({"Projects": projectList})
         
