@@ -26,6 +26,7 @@ class Asset(Resource):
         if data['token']:
             try:
                 user_id = getUserIdToken(data['token'])
+                
             except GitlabAuthorizationException as error:
                 abort(403, 'User Unauthorized.')
         else:
@@ -51,7 +52,7 @@ class Asset(Resource):
     # eventually modify to do CS updates?
     def put(self, id):
         asset = AssetModel.query.get(id)
-        
+
         if not asset:
             abort(404, 'No Asset Found.')
         
