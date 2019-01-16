@@ -45,11 +45,13 @@ class Asset(Resource):
 
         db.session.add(asset)
         db.session.commit()
+
         return jsonify({'Asset': asset.to_json()})
     
     # eventually modify to do CS updates?
     def put(self, id):
         asset = AssetModel.query.get(id)
+        
         if not asset:
             abort(404, 'No Asset Found.')
         
@@ -62,15 +64,20 @@ class Asset(Resource):
         asset.asset_name = data['asset_name']
         asset.description = data['description']
         asset.image_url = data['image_url']
+
         db.session.commit()
+
         return jsonify({'asset': asset})
 
     def delete(self, id):
         asset = AssetModel.query.get(id)
+
         if not asset:
             abort(204, 'No Asset Found')
+
         db.session.delete(id)
         db.session.commit()
+
         return jsonify({'asset': asset})
 
 # List all assets in the metadata db
@@ -78,8 +85,10 @@ class AllAssets(Resource):
     def get(self):
         assets = AssetModel.query.all()
         assetList = []
+
         for asset in assets:
             assetList.append(asset.to_json())
+
         return jsonify({'assets': assetList})
 
 #TODO ADD OAuth2 Support
@@ -90,8 +99,10 @@ class AssetList(Resource):
             user_id = getUserIdToken(token)
             assets = AssetModel.query.filter(current_user_id=user_id)
             json_data = []
+
             for asset in assets:
                 json_data.append(asset.to_json())
+
         except GitlabAuthorizationException as error:
             abort(403, "User Unauthorized.")
 

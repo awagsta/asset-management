@@ -28,6 +28,7 @@ class User(Resource):
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 user = gl.users.create(user)
+
         except GitlabCreateError as error:
             abort(400, 'Bad Request. Could not Create User.')
         except GitlabAuthenticationError as error:
@@ -40,6 +41,7 @@ class User(Resource):
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False) as gl:
                 user = gl.users.get(id)
+
         except GitlabGetError as error:
             abort(404, 'Gitlab Resource Not Found.')
 
@@ -51,6 +53,7 @@ class User(Resource):
                 gl.users.delete(id)
                 message = {'User with id {} deleted.'.format(id)}
             return jsonify(message)
+
         except GitlabDeleteError as error:
             abort(204, 'Resource not found.')
         except GitlabAuthenticationError as error:
@@ -64,9 +67,11 @@ class UserList(Resource):
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 users = gl.users.list()
                 userList = []
+
                 for user in users:
                     userList.append({"user": user.attributes})
+
         except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
-            
+
         return jsonify({'Users': userList})
