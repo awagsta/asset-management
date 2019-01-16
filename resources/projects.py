@@ -3,7 +3,7 @@ sys.path.append('..')
 from flask_restful import Resource
 from flask import jsonify
 import gitlab
-from gitlab.exceptions import GitlabAuthorizationException
+from gitlab.exceptions import GitlabAuthenticationError
 from auth import repo_url
 
 # Get a single project by ID
@@ -13,7 +13,7 @@ class Project(Resource):
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 project = gl.projects.get(id)
 
-        except GitlabAuthorizationException as error:
+        except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
 
         return jsonify({"project": project.attributes})
@@ -29,7 +29,7 @@ class AllProjects(Resource):
                 for project in projects:
                     projectList.append({"project": project.attributes})
 
-        except GitlabAuthorizationException as error:
+        except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
 
         return jsonify({"Projects": projectList})
@@ -45,7 +45,7 @@ class Project_List(Resource):
                 for project in projects:
                     projectList.append({"project": project.attributes})
 
-        except GitlabAuthorizationException as error:
+        except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
         
         return jsonify({"Projects": projectList})

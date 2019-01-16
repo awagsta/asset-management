@@ -6,8 +6,7 @@ from models.models import *
 from auth import repo_url, getUserIdToken
 from database import db
 import gitlab
-from gitlab.exceptions import GitlabAuthorizationException
-
+from gitlab.exceptions import GitlabAuthenticationError
 # Asset CRUD Operations
 class Asset(Resource):
     def get(self, id):
@@ -26,8 +25,8 @@ class Asset(Resource):
         if data['token']:
             try:
                 user_id = getUserIdToken(data['token'])
-                
-            except GitlabAuthorizationException as error:
+
+            except GitlabAuthenticationError as error:
                 abort(403, 'User Unauthorized.')
         else:
             abort(403, 'User Unauthorized.')
@@ -104,8 +103,7 @@ class AssetList(Resource):
             for asset in assets:
                 json_data.append(asset.to_json())
 
-        except GitlabAuthorizationException as error:
+        except GitlabAuthenticationError as error:
             abort(403, "User Unauthorized.")
 
-        return jsonify({"Assets": json_data})
-        
+        return jsonify({"Assets": json_data})    
