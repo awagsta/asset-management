@@ -2,21 +2,20 @@ import sys
 sys.path.append('..')
 from flask_restful import Resource
 from flask import jsonify, abort, request
-from models.models import AssetModel
-from models.models import CsModel
-from models.models import IndustryModel
-from auth import repo_url, getUserIdOauth, getUserIdToken
+from models.models import *
+from auth import repo_url, getUserIdToken
 from database import db
 import gitlab
+from gitlab.exceptions import GitlabAuthorizationException
 
-
+# Asset CRUD Operations
 class Asset(Resource):
     def get(self, id):
         asset = AssetModel.query.get(id)
         if asset:
             return jsonify({'asset': asset.to_json()})
         else:
-            abort(404)
+            abort(404, 'No Asset Found.')
     
     def post(self):
         if not request.json:
@@ -24,15 +23,13 @@ class Asset(Resource):
         
         data = request.get_json()
 
-        # Get OAuth2 Token. Add JWT Support
-        oath_cookie = request.cookies.get('access_token')
-        
-        if oath_cookie:
-            user_id = getUserIdOauth(oath_cookie)
-        elif data['token']:
-            user_id= getUserIdToken(data['token'])
+        if data['token']:
+            try:
+                user_id = getUserIdToken(data['token'])
+            except GitlabAuthorizationException as error:
+                abort(403, 'User Unauthorized.')
         else:
-            abort(400)
+            abort(403, 'User Unauthorized.')
         
         asset = AssetModel(gitlab_id=data['gitlab_id'], 
             asset_name=data['asset_name'], description=data['description'], 
@@ -54,7 +51,7 @@ class Asset(Resource):
     def put(self, id):
         asset = AssetModel.query.get(id)
         if not asset:
-            abort(404)
+            abort(404, 'No Asset Found.')
         
         if not request.json:
             abort(400)
@@ -71,12 +68,12 @@ class Asset(Resource):
     def delete(self, id):
         asset = AssetModel.query.get(id)
         if not asset:
-            abort(404)
+            abort(204, 'No Asset Found')
         db.session.delete(id)
         db.session.commit()
         return jsonify({'asset': asset})
 
-
+# List all assets in the metadata db
 class AllAssets(Resource):
     def get(self):
         assets = AssetModel.query.all()
@@ -86,13 +83,17 @@ class AllAssets(Resource):
         return jsonify({'assets': assetList})
 
 #TODO ADD OAuth2 Support
+# List all assets in metadata db associated with a user
 class AssetList(Resource):
     def get(self, token):
-        user_id = getUserIdToken(token)
-        assets = AssetModel.query.filter(current_user_id=user_id)
-        json_data = []
-        for asset in assets:
-            json_data.append(asset.to_json())
-        
+        try:
+            user_id = getUserIdToken(token)
+            assets = AssetModel.query.filter(current_user_id=user_id)
+            json_data = []
+            for asset in assets:
+                json_data.append(asset.to_json())
+        except GitlabAuthorizationException as error:
+            abort(403, "User Unauthorized.")
+
         return jsonify({"Assets": json_data})
         
