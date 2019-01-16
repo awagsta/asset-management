@@ -4,6 +4,7 @@ from flask_restful import Resource
 from flask import request, abort, url_for, jsonify
 from auth import repo_url
 import gitlab
+from gitlab.exceptions import *
 
 # add user lookup to ensure user does not already exist.
 
@@ -22,46 +23,50 @@ class User(Resource):
             'name': data['name']
         }
 
-        # Get OAuth2 Token from cookie if it exists.
-        oauth_cookie = request.cookies.get('access_token')
+        token = data['token']
 
-        if oauth_cookie:
-            oauth_token = cookie
-            with gitlab.Gitlab(repo_url, ssl_verify=False, oauth_token=oauth_token) as gl:
-                user = gl.users.create(user)
-        
-        # If no OAuth 2 Token, but private token was provided.
-        elif data['token']:
-            token = data['token']
+        try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 user = gl.users.create(user)
-        else:
-            abort(403)
+        except GitlabCreateError as error:
+            abort(400, 'Bad Request. Could not Create User.')
+        except GitlabAuthenticationError as error:
+            abort(403, 'User Unauthorized.')
         
         return jsonify({'user': user.attributes, 'id': url_for('get_user', 
-        id=user.attributes.id, _external=True)})
+        id=user.attributes.id, _external=True)}), 201
 
     def get(self, id):
-        with gitlab.Gitlab(repo_url, ssl_verify=False) as gl:
-            user = gl.users.get(id)
+        try:
+            with gitlab.Gitlab(repo_url, ssl_verify=False) as gl:
+                user = gl.users.get(id)
+        except GitlabGetError as error:
+            abort(404, 'Gitlab Resource Not Found.')
+
         return jsonify({'user': user.attributes})
     
     def delete(self, id, token):
-        if token:
+        try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 gl.users.delete(id)
                 message = {'User with id {} deleted.'.format(id)}
             return jsonify(message)
-        else:
-            abort(403)
+        except GitlabDeleteError as error:
+            abort(204, 'Resource not found.')
+        except GitlabAuthenticationError as error:
+            abort(403, 'User Unauthorized.')
 
 
 class UserList(Resource):
     # Requires API privileges
     def get(self, token):
-        with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
-            users = gl.users.list()
-            userList = []
-            for user in users:
-                userList.append({"user": user.attributes})
+        try:
+            with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
+                users = gl.users.list()
+                userList = []
+                for user in users:
+                    userList.append({"user": user.attributes})
+        except GitlabAuthenticationError as error:
+            abort(403, 'User Unauthorized.')
+            
         return jsonify({'Users': userList})
