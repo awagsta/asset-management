@@ -11,6 +11,7 @@ from auth import repo_url
 class Project(Resource):
     def get(self, id, token):
         try:
+
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 project = gl.projects.get(id)
 
@@ -23,6 +24,7 @@ class Project(Resource):
 class AllProjects(Resource):
     def get(self, token):
         try:
+
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 projects = gl.projects.get()
                 projectList = []
@@ -39,6 +41,7 @@ class AllProjects(Resource):
 class Project_List(Resource):
     def get(self, id, token):
         try:
+
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 projects = gl.projects.list(owned=True)
                 projectList = []
@@ -48,5 +51,6 @@ class Project_List(Resource):
 
         except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
+
         return jsonify({"Projects": projectList})
         

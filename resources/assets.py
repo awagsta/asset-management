@@ -3,16 +3,18 @@ sys.path.append('..')
 from flask_restful import Resource
 from flask import jsonify, abort, request
 from models.models import *
-from auth import repo_url, getUserIdToken
+from auth import repo_url, getUserIdToken, getUserIdOauth
 from database import db
 import gitlab
 from gitlab.exceptions import GitlabAuthenticationError
+
 # Asset CRUD Operations
 class Asset(Resource):
     def get(self, id):
         asset = AssetModel.query.get(id)
         if asset:
             return jsonify({'asset': asset.to_json()})
+
         else:
             abort(404, 'No Asset Found.')
     
@@ -22,14 +24,13 @@ class Asset(Resource):
         
         data = request.get_json()
 
-        if data['token']:
-            try:
-                user_id = getUserIdToken(data['token'])
+        # if 'Authorization' in request.headers:
+        #     oauth_token = request.headers['Authorization']
+        #     user_id = getUserIdOauth(oauth_token)
 
-            except GitlabAuthenticationError as error:
-                abort(403, 'User Unauthorized.')
-        else:
-            abort(403, 'User Unauthorized.')
+        if 'token' in data:
+            token = data['token']
+            user_id = getUserIdToken(token)
         
         asset = AssetModel(gitlab_id=data['gitlab_id'], 
             asset_name=data['asset_name'], description=data['description'], 

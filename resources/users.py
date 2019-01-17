@@ -23,7 +23,11 @@ class User(Resource):
             'name': data['name']
         }
 
-        token = data['token']
+ 
+        if 'token' in data:
+            token = data['token']
+        else:
+            abort(403)
 
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
@@ -39,6 +43,7 @@ class User(Resource):
 
     def get(self, id):
         try:
+
             with gitlab.Gitlab(repo_url, ssl_verify=False) as gl:
                 user = gl.users.get(id)
 
@@ -49,8 +54,10 @@ class User(Resource):
     
     def delete(self, id, token):
         try:
+
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 gl.users.delete(id)
+
             return jsonify({'User deleted.'})
 
         except GitlabDeleteError as error:
@@ -63,6 +70,7 @@ class UserList(Resource):
     # Requires API privileges
     def get(self, token):
         try:
+
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 users = gl.users.list()
                 userList = []
