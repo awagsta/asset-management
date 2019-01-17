@@ -30,7 +30,7 @@ class AllProjects(Resource):
                 projectList = []
 
                 for project in projects:
-                    projectList.append({"project": project.attributes})
+                    projectList.append({project.attributes})
 
         except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
@@ -39,10 +39,11 @@ class AllProjects(Resource):
 
 # Get a List of all projects by a user.
 class Project_List(Resource):
-    def get(self, id, token):
+    def get(self, token):
         try:
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
+                
                 projects = gl.projects.list(owned=True)
                 projectList = []
 

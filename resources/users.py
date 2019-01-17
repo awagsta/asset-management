@@ -39,7 +39,7 @@ class User(Resource):
             abort(403, 'User Unauthorized.')
         
         return jsonify({'user': user.attributes, 'id': url_for('get_user', 
-        id=user.attributes.id, _external=True)}), 201
+        id=user.attributes['id'], _external=True)}), 201
 
     def get(self, id):
         try:
@@ -76,7 +76,7 @@ class UserList(Resource):
                 userList = []
 
                 for user in users:
-                    userList.append({"user": user.attributes})
+                    userList.append({user.attributes})
 
         except GitlabAuthenticationError as error:
             abort(403, 'User Unauthorized.')
