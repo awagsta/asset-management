@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from database import db
+from init import db
 from flask import url_for
 
 class AssetModel(db.Model):
