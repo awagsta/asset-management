@@ -16,7 +16,7 @@ class Project(Resource):
                 project = gl.projects.get(id)
 
         except GitlabAuthenticationError as error:
-            abort(403, 'User Unauthorized.')
+            abort(401, 'User Unauthorized.')
 
         return jsonify({"project": project.attributes})
 
@@ -33,7 +33,7 @@ class AllProjects(Resource):
                     projectList.append({project.attributes})
 
         except GitlabAuthenticationError as error:
-            abort(403, 'User Unauthorized.')
+            abort(401, 'User Unauthorized.')
 
         return jsonify({"Projects": projectList})
 
@@ -51,7 +51,7 @@ class Project_List(Resource):
                     projectList.append({"project": project.attributes})
 
         except GitlabAuthenticationError as error:
-            abort(403, 'User Unauthorized.')
+            abort(401, 'User Unauthorized.')
 
         return jsonify({"Projects": projectList})
         

@@ -105,6 +105,6 @@ class AssetList(Resource):
                 json_data.append(asset.to_json())
 
         except GitlabAuthenticationError as error:
-            abort(403, "User Unauthorized.")
+            abort(401, "User Unauthorized.")
 
         return jsonify({"Assets": json_data})    

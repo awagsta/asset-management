@@ -27,7 +27,7 @@ class User(Resource):
         if 'token' in data:
             token = data['token']
         else:
-            abort(403)
+            abort(401)
 
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
@@ -36,7 +36,7 @@ class User(Resource):
         except GitlabCreateError as error:
             abort(400, 'Bad Request. Could not Create User.')
         except GitlabAuthenticationError as error:
-            abort(403, 'User Unauthorized.')
+            abort(401, 'User Unauthorized.')
         
         return jsonify({'user': user.attributes, 'id': url_for('get_user', 
         id=user.attributes['id'], _external=True)}), 201
@@ -63,7 +63,7 @@ class User(Resource):
         except GitlabDeleteError as error:
             abort(204, 'Resource not found.')
         except GitlabAuthenticationError as error:
-            abort(403, 'User Unauthorized.')
+            abort(401, 'User Unauthorized.')
 
 
 class UserList(Resource):
@@ -79,6 +79,6 @@ class UserList(Resource):
                     userList.append({user.attributes})
 
         except GitlabAuthenticationError as error:
-            abort(403, 'User Unauthorized.')
+            abort(401, 'User Unauthorized.')
 
         return jsonify({'Users': userList})

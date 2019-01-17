@@ -16,7 +16,7 @@ def getUserIdToken(token):
         return current_user_id
 
     except GitlabAuthenticationError as error:
-        abort(403, 'User Unauthorized.')
+        abort(401, 'User Unauthorized.')
 
 def getUserIdOauth(oauth_token):
     try:
@@ -28,27 +28,37 @@ def getUserIdOauth(oauth_token):
         return current_user_id
 
     except GitlabAuthenticationError as error:
-        abort(403, 'User Unauthorized.')
+        abort(401, 'User Unauthorized.')
 
 
-# Authentication Wrapper for routes that don't naturally have validation via gitlab
-def authenticate(func):
-    def _wrap(*args, **kwargs):
-        if 'Private-Token' not in request.headers:
-            # No Token provided
-            abort(403)
-            return None
-
-        print("Checking Token.")
-        headers = {'Private-Token': request.headers['Private-Token']}
+#Validates authenticity of token and returns user id.
+def validate(token):
+        headers = {'Private-Token': token}
         r = requests.get('https://gitlab.cloudsolutionhubs.com/api/v4/user', verify=False, headers=headers)
 
         if r.status_code != requests.codes.ok:
             print('validation failed')
-            abort(403)
+            return none
+
+        data = r.json()
+        return data['id']
+
+
+# Authentication Wrapper for routes 
+# that don't naturally have validation/authentication via gitlab
+def authenticate(func):
+    def _wrap(*args, **kwargs):
+        if 'Private-Token' not in request.headers:
+            # No Token provided
+            abort(401, 'User Unauthorized')
             return None
 
-        func(*args,**kwargs)
-    return _wrap
-        
+        print("Checking Token.")
+        id = validate(request.headers['Private-Token'])
 
+        if id is None:
+            abort(401, 'User Unauthorized')
+            return None
+
+        return func(id=id, *args, **kwargs)
+    return _wrap
