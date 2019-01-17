@@ -3,7 +3,7 @@ sys.path.append('..')
 from flask_restful import Resource
 from flask import jsonify, abort, request
 from models.models import *
-from auth import repo_url, getUserIdToken, getUserIdOauth
+from auth import repo_url, getUserIdToken, getUserIdOauth, authenticate
 from database import db
 import gitlab
 from gitlab.exceptions import GitlabAuthenticationError
