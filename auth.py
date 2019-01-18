@@ -38,7 +38,7 @@ def validate(token):
 
         if r.status_code != requests.codes.ok:
             print('validation failed')
-            return none
+            return None
 
         data = r.json()
         return data['id']
