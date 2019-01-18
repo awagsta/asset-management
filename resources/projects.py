@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 from flask_restful import Resource
-from flask import jsonify, abort
+from flask import jsonify, abort, request
 import gitlab
 from gitlab.exceptions import GitlabAuthenticationError
 from auth import repo_url
