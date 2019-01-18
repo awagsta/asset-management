@@ -10,6 +10,7 @@ from gitlab.exceptions import GitlabAuthenticationError
 
 # Asset CRUD Operations
 class Asset(Resource):
+
     @authenticate
     def get(self, id, user_id):
         asset = AssetModel.query.get(id)
@@ -25,14 +26,6 @@ class Asset(Resource):
             abort(400)
         
         data = request.get_json()
-
-        # if 'Authorization' in request.headers:
-        #     oauth_token = request.headers['Authorization']
-        #     user_id = getUserIdOauth(oauth_token)
-
-        # if 'token' in data:
-        #     token = data['token']
-        #     user_id = getUserIdToken(token)
         
         asset = AssetModel(gitlab_id=data['gitlab_id'], 
             asset_name=data['asset_name'], description=data['description'], 
