@@ -10,15 +10,17 @@ from gitlab.exceptions import GitlabAuthenticationError
 
 # Asset CRUD Operations
 class Asset(Resource):
-    def get(self, id):
+    @authenticate
+    def get(self, id, user_id):
         asset = AssetModel.query.get(id)
         if asset:
             return jsonify({'asset': asset.to_json()})
 
         else:
             abort(404, 'No Asset Found.')
-    
-    def post(self):
+
+    @authenticate
+    def post(self, user_id):
         if not request.json:
             abort(400)
         
@@ -28,9 +30,9 @@ class Asset(Resource):
         #     oauth_token = request.headers['Authorization']
         #     user_id = getUserIdOauth(oauth_token)
 
-        if 'token' in data:
-            token = data['token']
-            user_id = getUserIdToken(token)
+        # if 'token' in data:
+        #     token = data['token']
+        #     user_id = getUserIdToken(token)
         
         asset = AssetModel(gitlab_id=data['gitlab_id'], 
             asset_name=data['asset_name'], description=data['description'], 
@@ -50,7 +52,8 @@ class Asset(Resource):
         return jsonify({'Asset': asset.to_json()})
     
     # eventually modify to do CS updates?
-    def put(self, id):
+    @authenticate
+    def put(self, id, user_id):
         asset = AssetModel.query.get(id)
 
         if not asset:
@@ -70,7 +73,8 @@ class Asset(Resource):
 
         return jsonify({'asset': asset})
 
-    def delete(self, id):
+    @authenticate
+    def delete(self, id, user_id):
         asset = AssetModel.query.get(id)
 
         if not asset:
@@ -83,7 +87,8 @@ class Asset(Resource):
 
 # List all assets in the metadata db
 class AllAssets(Resource):
-    def get(self):
+    @authenticate
+    def get(self, user_id):
         assets = AssetModel.query.all()
         assetList = []
 
@@ -95,9 +100,10 @@ class AllAssets(Resource):
 #TODO ADD OAuth2 Support
 # List all assets in metadata db associated with a user
 class AssetList(Resource):
-    def get(self, token):
+
+    @authenticate
+    def get(self, user_id):
         try:
-            user_id = getUserIdToken(token)
             assets = AssetModel.query.filter(current_user_id=user_id)
             json_data = []
 

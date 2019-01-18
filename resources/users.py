@@ -14,6 +14,9 @@ class User(Resource):
         if not request.json:
             abort(400)
 
+        if 'Private-Token' not in request.headers:
+            abort(401, 'User Unauthorized')
+
         data = request.get_json()
 
         user = {
@@ -23,11 +26,8 @@ class User(Resource):
             'name': data['name']
         }
 
- 
-        if 'token' in data:
-            token = data['token']
-        else:
-            abort(401)
+
+        token = request.headers['Private-Token']
 
         try:
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
@@ -52,8 +52,14 @@ class User(Resource):
 
         return jsonify({'user': user.attributes})
     
-    def delete(self, id, token):
+    def delete(self, id):
+        if 'Private-Token' not in request.headers:
+            abort(401, 'User Unauthorized')
+
+        token = request.headers['Private-Token']
+
         try:
+
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 gl.users.delete(id)
@@ -68,7 +74,12 @@ class User(Resource):
 
 class UserList(Resource):
     # Requires API privileges
-    def get(self, token):
+    def get(self):
+        if 'Private-Token' not in request.headers:
+            abort(401, 'User Unauthorized')
+
+        token = request.headers['Private-Token']
+
         try:
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:

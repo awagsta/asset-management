@@ -9,7 +9,13 @@ from auth import repo_url
 
 # Get a single project by ID
 class Project(Resource):
-    def get(self, id, token):
+    def get(self, id):
+
+        if 'Private-Token' not in request.headers:
+            abort(401, 'User Unauthorized')
+
+        token = request.headers['Private-Token']
+
         try:
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
@@ -22,7 +28,13 @@ class Project(Resource):
 
 # Get all existing projects.
 class AllProjects(Resource):
-    def get(self, token):
+    def get(self):
+
+        if 'Private-Token' not in request.headers:
+            abort(401, 'User Unauthorized')
+
+        token = request.headers['Private-Token']
+
         try:
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
@@ -39,7 +51,13 @@ class AllProjects(Resource):
 
 # Get a List of all projects by a user.
 class Project_List(Resource):
-    def get(self, token):
+    def get(self):
+
+        if 'Private-Token' not in request.headers:
+            abort(401, 'User Unauthorized')
+
+        token = request.headers['Private-Token']
+
         try:
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:

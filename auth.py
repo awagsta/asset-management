@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from flask import abort
+from flask import abort, request
 import gitlab
 import requests
 repo_url = 'https://gitlab.cloudsolutionhubs.com'
@@ -54,11 +54,11 @@ def authenticate(func):
             return None
 
         print("Checking Token.")
-        id = validate(request.headers['Private-Token'])
+        user_id = validate(request.headers['Private-Token'])
 
-        if id is None:
+        if user_id is None:
             abort(401, 'User Unauthorized')
             return None
 
-        return func(id=id, *args, **kwargs)
+        return func(user_id=user_id, *args, **kwargs)
     return _wrap

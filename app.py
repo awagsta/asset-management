@@ -17,12 +17,12 @@ api = Api(app)
 api.add_resource(Asset, '/asset/<int:id>', endpoint='get_asset')
 api.add_resource(Asset, '/asset/')
 api.add_resource(AllAssets, '/assets/')
-api.add_resource(UserList, '/users/<string:token>')
+api.add_resource(UserList, '/users/')
 api.add_resource(User, '/users/<int:id>', endpoint='get_user')
-api.add_resource(User, '/users/', '/users/<int:id>/<string:token>')
+api.add_resource(User, '/users/')
 #api.add_resource(AllProjects, '/allprojects/<string:token>')
-api.add_resource(Project, '/project/<int:id>/<string:token>')
-api.add_resource(Project_List, '/projects/<string:token>')
+api.add_resource(Project, '/project/<int:id>/')
+api.add_resource(Project_List, '/projects/')
 
 
 if __name__ == "__main__":
