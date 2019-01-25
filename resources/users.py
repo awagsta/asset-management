@@ -84,11 +84,8 @@ class UserList(Resource):
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 users = gl.users.list()
-                userList = []
-
-                for user in users:
-                    userList.append({user.attributes})
-
+                userList = [user.attributes for user in users]
+                
         except GitlabAuthenticationError as error:
             abort(401, 'User Unauthorized.')
 

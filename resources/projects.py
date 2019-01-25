@@ -39,10 +39,7 @@ class AllProjects(Resource):
 
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 projects = gl.projects.get()
-                projectList = []
-
-                for project in projects:
-                    projectList.append({project.attributes})
+                projectList = [project.attributes for project in projects]
 
         except GitlabAuthenticationError as error:
             abort(401, 'User Unauthorized.')
@@ -63,10 +60,7 @@ class Project_List(Resource):
             with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
                 
                 projects = gl.projects.list(owned=True)
-                projectList = []
-
-                for project in projects:
-                    projectList.append({"project": project.attributes})
+                projectList = [project.attributes for project in projects]
 
         except GitlabAuthenticationError as error:
             abort(401, 'User Unauthorized.')

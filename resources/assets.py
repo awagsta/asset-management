@@ -2,11 +2,11 @@ import sys
 sys.path.append('..')
 from flask_restful import Resource
 from flask import jsonify, abort, request
+import gitlab
+from gitlab.exceptions import GitlabAuthenticationError
 from models.models import *
 from auth import repo_url, getUserIdToken, getUserIdOauth, authenticate
 from init import db
-import gitlab
-from gitlab.exceptions import GitlabAuthenticationError
 
 # Asset CRUD Operations
 class Asset(Resource):
@@ -83,11 +83,8 @@ class AllAssets(Resource):
     @authenticate
     def get(self, user_id):
         assets = AssetModel.query.all()
-        assetList = []
-
-        for asset in assets:
-            assetList.append(asset.to_json())
-
+        assetList = [asset.to_json() for asset in assets]
+        
         return jsonify({'assets': assetList})
 
 #TODO ADD OAuth2 Support
@@ -96,14 +93,7 @@ class AssetList(Resource):
 
     @authenticate
     def get(self, user_id):
-        try:
-            assets = AssetModel.query.filter(current_user_id=user_id)
-            json_data = []
-
-            for asset in assets:
-                json_data.append(asset.to_json())
-
-        except GitlabAuthenticationError as error:
-            abort(401, "User Unauthorized.")
+        assets = AssetModel.query.filter(current_user_id=user_id)
+        assetLlist = [asset.to_json() for asset in assets]
 
         return jsonify({"Assets": json_data})    
