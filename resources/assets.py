@@ -4,8 +4,6 @@ from flask_restful import Resource
 from flask import jsonify, abort, request
 import gitlab
 from gitlab.exceptions import GitlabAuthenticationError
-# from webargs import fields
-# from webargs.flaskparser import use_args
 from models.models import *
 from auth import repo_url, getUserIdToken, getUserIdOauth, authenticate
 from init import db
@@ -97,7 +95,7 @@ class AllAssets(Resource):
     def get(self, user_id):
         assets = AssetModel.query.all()
         asset_schema = AssetSchema(many=True)
-        result = asset_schema.dump(assets)
+        result = asset_schema.dumps(assets)
         return jsonify(result.data)
 
 #TODO ADD OAuth2 Support
