@@ -1,7 +1,9 @@
 import sys
 sys.path.append('..')
-from init import db
 from flask import url_for
+from marshmallow import Schema, fields
+from init import db
+
 
 class AssetModel(db.Model):
     __tablename__ = 'assets'
@@ -55,3 +57,22 @@ class IndustryModel(db.Model):
     def to_json(self):
         industry = {"industry": self.industry_name}
         return industry
+
+
+class IndustrySchema(Schema):
+    industry_name = fields.Str()
+
+
+class CsSchema(Schema):
+    service_name = fields.Str()
+
+
+class AssetSchema(Schema):
+    user_id = fields.Integer()
+    asset_id = fields.Integer()
+    gitlab_id = fields.Integer()
+    asset_name = fields.Str()
+    description = fields.Str()
+    image_url = fields.Str() # replace with fields.url
+    industries = fields.Nested(IndustrySchema, many=True)
+    cloud_services = fields.Nested(CsSchema, many=True)

@@ -4,6 +4,8 @@ from flask_restful import Resource
 from flask import jsonify, abort, request
 import gitlab
 from gitlab.exceptions import GitlabAuthenticationError
+# from webargs import fields
+# from webargs.flaskparser import use_args
 from models.models import *
 from auth import repo_url, getUserIdToken, getUserIdOauth, authenticate
 from init import db
@@ -14,14 +16,19 @@ class Asset(Resource):
     @authenticate
     def get(self, id, user_id):
         asset = AssetModel.query.get(id)
+        asset_schema = AssetSchema()
+        result = asset_schema.dump(asset)
+
         if asset:
-            return jsonify({'asset': asset.to_json()})
+            return jsonify(result.data)
 
         else:
             abort(404, 'No Asset Found.')
 
     @authenticate
     def post(self, user_id):
+        asset_schema = AssetSchema()
+
         if not request.json:
             abort(400)
         
@@ -35,19 +42,21 @@ class Asset(Resource):
         for cs in data['cloud_services']:
             db.session.add(CsModel(AssetModel=asset, service_name=cs))
 
-    #Create Industry Objects
+     #Create Industry Objects
         for industry in data['industries']:
             db.session.add(IndustryModel(AssetModel=asset, industry_name=industry))
 
         db.session.add(asset)
         db.session.commit()
+        result = asset_schema.dump(asset)
 
-        return jsonify({'Asset': asset.to_json()})
+        return jsonify(result.data)
     
     # eventually modify to do CS updates?
     @authenticate
     def put(self, id, user_id):
         asset = AssetModel.query.get(id)
+        asset_schema = AssetSchema()
 
         if not asset:
             abort(404, 'No Asset Found.')
@@ -63,11 +72,13 @@ class Asset(Resource):
         asset.image_url = data['image_url']
 
         db.session.commit()
+        result = asset_schema.dump(asset)
 
-        return jsonify({'asset': asset})
+        return jsonify(result.data)
 
     @authenticate
     def delete(self, id, user_id):
+        asset_schema = AssetSchema()
         asset = AssetModel.query.get(id)
 
         if not asset:
@@ -76,16 +87,18 @@ class Asset(Resource):
         db.session.delete(id)
         db.session.commit()
 
-        return jsonify({'asset': asset})
+        result = asset_schema.dump(asset)
+
+        return jsonify(result.data)
 
 # List all assets in the metadata db
 class AllAssets(Resource):
     @authenticate
     def get(self, user_id):
         assets = AssetModel.query.all()
-        assetList = [asset.to_json() for asset in assets]
-        
-        return jsonify({'assets': assetList})
+        asset_schema = AssetSchema(many=True)
+        result = asset_schema.dump(assets)
+        return jsonify(result.data)
 
 #TODO ADD OAuth2 Support
 # List all assets in metadata db associated with a user
@@ -94,6 +107,6 @@ class AssetList(Resource):
     @authenticate
     def get(self, user_id):
         assets = AssetModel.query.filter(current_user_id=user_id)
-        assetLlist = [asset.to_json() for asset in assets]
-
-        return jsonify({"Assets": json_data})    
+        asset_schema = AssetSchema(many=True)
+        result = asset_schema.dump(assets)
+        return jsonify(result.data)    
