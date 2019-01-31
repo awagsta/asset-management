@@ -14,9 +14,11 @@ db.create_all(app=app)
 
 api = Api(app)
 
-api.add_resource(Asset, '/asset/<int:id>', endpoint='get_asset')
+api.add_resource(AssetDetails, '/asset/details/<int:id>')
 api.add_resource(Asset, '/asset/')
+api.add_resource(Asset, '/asset/<int:id>', endpoint='get_asset')
 api.add_resource(AllAssets, '/assets/')
+api.add_resource(AssetList, '/assets/list/')
 api.add_resource(UserList, '/users/')
 api.add_resource(User, '/users/<int:id>', endpoint='get_user')
 api.add_resource(User, '/users/')

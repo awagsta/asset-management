@@ -56,7 +56,7 @@ class Asset(Resource):
 
         return jsonify(result.data)
     
-    # eventually modify to do CS updates?
+
     @authenticate
     @use_args(asset_args)
     def put(self, args, user_id, id):
@@ -66,13 +66,9 @@ class Asset(Resource):
         if not asset:
             abort(404, 'No Asset Found.')
         
-        # if not request.json:
-        #     abort(400)
-        
-        # data = request.get_json()
         db.session.delete(asset)
         db.session.commit()
-        
+
         asset = AssetModel(gitlab_id=args['gitlab_id'], asset_id=id ,
             asset_name=args['asset_name'], description=args['description'], 
             image_url=args['image_url'], user_id=user_id)
@@ -114,15 +110,37 @@ class AllAssets(Resource):
         return jsonify(result.data)
 
 #TODO ADD OAuth2 Support
-# List all assets in metadata db associated with a user
+# List all assets in metadata db associated with the current user
 class AssetList(Resource):
-
     @authenticate
     def get(self, user_id):
-        assets = AssetModel.query.filter(current_user_id=user_id)
+        assets = AssetModel.query.filter_by(user_id=user_id).all()
         asset_schema = AssetSchema(many=True)
         result = asset_schema.dump(assets)
         return jsonify(result.data)
+
+
+# Get Asset and associated Gitlab project info by asset id
+class AssetDetails(Resource):
+    def get(self, id):
+        asset = AssetModel.query.get(id)
+
+        if not asset:
+            abort(404, "No Asset Found.")
+
+        token = request.headers['Private-Token']
+
+        try:
+
+            with gitlab.Gitlab(repo_url, ssl_verify=False, private_token=token) as gl:
+                project = gl.projects.get(asset.gitlab_id)
+
+        except GitlabAuthenticationError as error:
+            abort(401, 'User Unauthorized.')
+        
+        asset_schema = AssetSchema()
+        result = asset_schema.dump(asset)
+        return jsonify([result.data, project.attributes])
 
 @parser.error_handler
 def handle_request_parsing_error(err, req, schema, error_status_code, error_headers):
