@@ -28,17 +28,25 @@ class IndustryModel(db.Model):
     asset_id = db.Column(db.Integer, db.ForeignKey('assets.asset_id'))
 
 class IndustrySchema(Schema):
-    industry_name = fields.Str()
+    class Meta:
+        strict = True
+
+    industry_name = fields.Str(required=True)
 
 class CsSchema(Schema):
-    service_name = fields.Str()
+    class Meta:
+        strict = True
+    service_name = fields.Str(required=True)
 
 class AssetSchema(Schema):
-    user_id = fields.Integer()
-    asset_id = fields.Integer()
-    gitlab_id = fields.Integer()
-    asset_name = fields.Str()
-    description = fields.Str()
-    image_url = fields.Str() # replace with fields.url
+    class Meta:
+        strict = True
+
+    user_id = fields.Integer(dump_only=True)
+    asset_id = fields.Integer(dump_only=True)
+    gitlab_id = fields.Integer(required=True)
+    asset_name = fields.Str(required=True)
+    description = fields.Str(required=True)
+    image_url = fields.Str(required=True) # replace with fields.url
     industries = fields.Nested(IndustrySchema, many=True)
     cloud_services = fields.Nested(CsSchema, many=True)
