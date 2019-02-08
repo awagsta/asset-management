@@ -4,7 +4,11 @@ from flask import url_for
 from marshmallow import Schema, fields
 from init import db
 
+
 class AssetModel(db.Model):
+    """
+    AssetModel represents an asset in the metadata database.
+    """
     __tablename__ = 'assets'
     user_id = db.Column(db.Integer, nullable=False)
     asset_id = db.Column(db.Integer, primary_key=True)
@@ -16,29 +20,51 @@ class AssetModel(db.Model):
     industries = db.relationship('IndustryModel',  backref='AssetModel')    
 
 class CsModel(db.Model):
+    """
+    CsModel represents a cloud service associated with an asset in
+    the metadata database. There may be many cloud services associated
+    with one asset.
+    """
     __tablename__: 'cloud_services'
     cs_id = db.Column(db.Integer, primary_key=True)
     service_name = db.Column(db.String(100))
     asset_id = db.Column(db.Integer, db.ForeignKey('assets.asset_id'))
 
 class IndustryModel(db.Model):
+    """
+    IndustryModel represents an industry associated with an asset in
+    the metadata database. There may be many industries associated with
+    one asset.
+    """
     __tablename__: 'industries'
     industry_id = db.Column(db.Integer, primary_key=True)
     industry_name = db.Column(db.String(100))
     asset_id = db.Column(db.Integer, db.ForeignKey('assets.asset_id'))
 
 class IndustrySchema(Schema):
+    """
+    IndustrySchema describes how industry data should be serialized
+    and de-serialized for input/output.
+    """
     class Meta:
         strict = True
 
     industry_name = fields.Str(required=True)
 
 class CsSchema(Schema):
+    """
+    CsSchema describes how cloud service data should be serialized
+    and de-serialized for input/output.
+    """
     class Meta:
         strict = True
     service_name = fields.Str(required=True)
 
 class AssetSchema(Schema):
+    """
+    AssetSchema describes how asset data should be serialized
+    and de-serialized for input/output.
+    """
     class Meta:
         strict = True
 

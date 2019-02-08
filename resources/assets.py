@@ -10,6 +10,7 @@ from models.models import *
 from auth import repo_url, getUserIdToken, getUserIdOauth, authenticate
 from init import db
 
+#webargs expected fields in post body for asset submission
 asset_args = {
     "gitlab_id": fields.Integer(required=True),
     "asset_name": fields.Str(required=True),
@@ -21,9 +22,19 @@ asset_args = {
 
 # Asset CRUD Operations
 class Asset(Resource):
+    """
+    Asset represents an API resource for a single asset
+    and it's associated CRUD operations.
+    """
 
     @authenticate
     def get(self, id, user_id):
+        """
+        Get an asset from the metadata database.
+        :param id: The id of the asset to retrieve
+        :return: The Asset.
+        """
+
         asset = AssetModel.query.get(id)
         if asset:
             asset_schema = AssetSchema()
@@ -36,6 +47,13 @@ class Asset(Resource):
     @authenticate
     @use_args(asset_args)
     def post(self, user_id, args):
+        """
+        Post an asset to the metadata database.
+        :param args: The asset args retrieved from the POST body
+        :param user_id: retrieved from the authenticate function
+        :return: the inserted asset.
+        """
+
         asset_schema = AssetSchema()
 
         asset = AssetModel(gitlab_id=args['gitlab_id'], 
@@ -60,6 +78,14 @@ class Asset(Resource):
     @authenticate
     @use_args(asset_args)
     def put(self, args, user_id, id):
+        """
+        Update an asset in the metadata database.
+        :param args: the asset args retrieved from the POST body
+        :param id: the id of the asset to update
+        :param user_id: retrieved from the authentication function
+        :return: the updated asset if found.
+        """
+
         asset = AssetModel.query.get(id)
         asset_schema = AssetSchema()
 
@@ -87,6 +113,13 @@ class Asset(Resource):
 
     @authenticate
     def delete(self, id, user_id):
+        """
+        Delete an asset from the metadata database.
+        :param id: the id of the asset to remove
+        :param user_id: retrieved from the authentication function
+        :return: the deleted asset if found.
+        """
+        
         asset_schema = AssetSchema()
         asset = AssetModel.query.get(id)
 
@@ -102,8 +135,16 @@ class Asset(Resource):
 
 # List all assets in the metadata db
 class AllAssets(Resource):
+    """
+    AllAssets represents an API resource for a list of all the assets.
+    """
     @authenticate
     def get(self, user_id):
+        """
+        Get a list of all assets from the metadata database.
+        :param user_id: retrieved from the authentication function
+        :return: all assets from the metadata database.
+        """
         assets = AssetModel.query.all()
         asset_schema = AssetSchema(many=True)
         result = asset_schema.dump(assets)
@@ -112,8 +153,17 @@ class AllAssets(Resource):
 #TODO ADD OAuth2 Support
 # List all assets in metadata db associated with the current user
 class AssetList(Resource):
+    """
+    AssetList represents an API resource for a list of assets for a user.
+    """
     @authenticate
     def get(self, user_id):
+        """
+        Get a list of all of the current user's assets from 
+        the metadata database.
+        :param user_id: retrieved from the authentication function
+        :return: list of the current user's assets from the metadata database.
+        """
         assets = AssetModel.query.filter_by(user_id=user_id).all()
         asset_schema = AssetSchema(many=True)
         result = asset_schema.dump(assets)
@@ -122,7 +172,17 @@ class AssetList(Resource):
 
 # Get Asset and associated Gitlab project info by asset id
 class AssetDetails(Resource):
+    """
+    AssetDetails represents an API resource for an asset and it's
+    associated metadata from gitlab.
+    """
     def get(self, id):
+        """
+        Get an asset and it's associated metadata from the metadata
+        database and gitlab.
+        :param id: the id of the asset to retrieve
+        :return: The Asset and it's gitlab metadata if found.
+        """
         asset = AssetModel.query.get(id)
 
         if not asset:

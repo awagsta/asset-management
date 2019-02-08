@@ -3,7 +3,7 @@ sys.path.append('..')
 from flask import abort, request
 import gitlab
 import requests
-repo_url = ''
+repo_url = 'http://129.213.56.181'
 
 #TODO: Implement cookie/JWT based authentication 
 def getUserIdToken(token):
