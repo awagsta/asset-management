@@ -31,7 +31,13 @@ def getUserIdOauth(oauth_token):
         abort(401, 'User Unauthorized.')
 
 
-#Validates authenticity of token and returns user id.
+"""
+Validates authenticty of user's access token and returns their user id
+from gitlab.
+
+:param token: the gitlab API token
+:return: The user's gitlab id if successful.
+"""
 def validate(token):
         headers = {'Private-Token': token}
         r = requests.get('https://gitlab.cloudsolutionhubs.com/api/v4/user', verify=False, headers=headers)
@@ -46,6 +52,12 @@ def validate(token):
 
 # Authentication Wrapper for routes 
 # that don't naturally have validation/authentication via gitlab
+"""
+Authentication wrapper for routes that do not naturally require authentication
+with gitlab.
+:param func: the function to wrap with authentication
+:return: The wrapped function
+"""
 def authenticate(func):
     def _wrap(*args, **kwargs):
         if 'Private-Token' not in request.headers:
