@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from webargs.flaskparser import parser, abort
 from init import create_app, db
 from resources.assets import *
 from resources.users import *
@@ -25,6 +26,10 @@ api.add_resource(User, '/users/')
 #api.add_resource(AllProjects, '/allprojects/<string:token>')
 api.add_resource(Project, '/project/<int:id>/')
 api.add_resource(Project_List, '/projects/')
+
+@parser.error_handler
+def handle_request_parsing_error(err, req, schema, error_status_code, error_headers):
+    abort(error_status_code, errors=err.messages)
 
 
 if __name__ == "__main__":

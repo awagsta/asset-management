@@ -2,35 +2,43 @@ import sys
 sys.path.append('..')
 from flask_restful import Resource
 from flask import request, abort, url_for, jsonify
+from marshmallow import fields
+from webargs.flaskparser import use_args
 from auth import repo_url
 import gitlab
 from gitlab.exceptions import *
 
 # add user lookup to ensure user does not already exist.
 
+#webargs expected fields for user creation
+user_args = {
+    'email': fields.Email(required=True),
+    'password': fields.Str(required=True),
+    'username': fields.Str(required=True),
+    'name': fields.Str(required=True)
+}
+
 class User(Resource):
     # This route requires API privileges
     """
     User represents an API resource for a user on gitlab.
     """
-    def post(self):
+    @use_args(user_args)
+    def post(self, args):
         """
         Create a gitlab user through the API. Requires admin privileges.
+        :param args: user args retrieved from the POST body
         :return: The created user.
         """
-        if not request.json:
-            abort(400)
 
         if 'Private-Token' not in request.headers:
             abort(401, 'User Unauthorized')
 
-        data = request.get_json()
-
         user = {
-            'email': data['email'],
-            'password': data['password'],
-            'username': data['username'],
-            'name': data['name']
+            'email': args['email'],
+            'password': args['password'],
+            'username': args['username'],
+            'name': args['name']
         }
 
 
