@@ -89,4 +89,3 @@ class Project_List(Resource):
             abort(401, 'User Unauthorized.')
 
         return jsonify({"Projects": projectList})
-        
