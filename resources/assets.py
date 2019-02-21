@@ -17,7 +17,8 @@ asset_args = {
     "description": fields.Str(required=True),
     "image_url": fields.Str(required=True),
     "cloud_services": fields.List(fields.Str(), required=True),
-    "industries": fields.List(fields.Str(), required=True)
+    "industries": fields.List(fields.Str(), required=True),
+    "Private-Token": fields.Str(required=True)
     }
 
 # Asset CRUD Operations
@@ -44,9 +45,8 @@ class Asset(Resource):
         else:
             abort(404, 'No Asset Found.')
 
-    @authenticate
-    @use_args(asset_args)
-    def post(self, user_id, args):
+    @use_args(asset_args, locations=("json", "headers"))
+    def post(self, args):
         """
         Post an asset to the metadata database.
         :param args: The asset args retrieved from the POST body
@@ -54,12 +54,16 @@ class Asset(Resource):
         :return: the inserted asset.
         """
 
+        
         asset_schema = AssetSchema()
+        user_id = getUserIdToken(args['Private-Token'])
 
         asset = AssetModel(gitlab_id=args['gitlab_id'], 
             asset_name=args['asset_name'], description=args['description'], 
             image_url=args['image_url'], user_id=user_id)
         
+        print(args['cloud_services'])
+
      # Create Cloud Service Objects
         for cs in args['cloud_services']:
             db.session.add(CsModel(AssetModel=asset, service_name=cs))
@@ -75,9 +79,8 @@ class Asset(Resource):
         return jsonify(result.data)
     
 
-    @authenticate
-    @use_args(asset_args)
-    def put(self, args, user_id, id):
+    @use_args(asset_args, locations=("json", "headers"))
+    def put(self, args, id):
         """
         Update an asset in the metadata database.
         :param args: the asset args retrieved from the POST body
@@ -88,6 +91,7 @@ class Asset(Resource):
 
         asset = AssetModel.query.get(id)
         asset_schema = AssetSchema()
+        user_id = getUserIdToken(args['Private-Token'])
 
         if not asset:
             abort(404, 'No Asset Found.')
