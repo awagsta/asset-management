@@ -62,7 +62,6 @@ class Asset(Resource):
             asset_name=args['asset_name'], description=args['description'], 
             image_url=args['image_url'], user_id=user_id)
         
-        print(args['cloud_services'])
 
      # Create Cloud Service Objects
         for cs in args['cloud_services']:
